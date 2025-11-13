@@ -77,17 +77,74 @@ class Agency:
         self._income = 0  #доход агентства
 
     def add_tour(self, tour):
-        self.tours.append()
+        self.tours.append(tour)
         print(f"Тур {self.id} добавлен в агенство")
 
     def show_available_tours(self):
-        pass
+        print("Доступные туры;")
+        for tour in self.tours:
+            if not tour._is_booked:
+                tour.info()
+
+    def book_tour(self, client, tour_id):
+        for tour in self.tours:
+            if tour.id == tour_id:
+                if not tour._is_booked:
+                    if client.pay(tour.price):
+                        tour.book(client)
+                        self._income += tour.price
+                        print(f"Тур {tour_id} забронирован для клиента {client.name}")
+                else:
+                    print(f"Тур {tour_id} уже забронирован")
+                return
+        print(f"Тур с id {tour_id} не найден")
+
+    def cancel_all_bookings(self):
+        for tour in self.tours:
+            if tour._is_booked:
+                tour.cancel_booking()
+        print("Все брони отменены")
+
+    def show_status(self):
+        print(f"Статус агентства {self.name}:")
+        for tour in self.tours:
+            tour.info()
+        print(f"Текущая выручка: {self._income} сом")
+
+
+
+
+
+agency = Agency("PKS travel")
+t1 = Tour(1, 12000, 7)
+t2 = Tour(2, 8000, 5)
+t3 = Tour(3, 15000, 10)
+agency.add_tour(t1)
+agency.add_tour(t2)
+agency.add_tour(t3)
+c1 = Client("Ноила", 20000)
+c2 = Client("шоди", 5000)
+agency.show_available_tours()
+agency.book_tour(c1, 1)
+agency.book_tour(c2, 2)
+agency.show_status()
+agency.cancel_all_bookings()
+agency.show_status()
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        
 
     
  
-# Методы:
-# add_tour(tour) — добавляет новый тур;
-# show_available_tours() — показывает все свободные туры;
-# book_tour(client, tour_id) — бронирует тур для клиента;
-# cancel_all_bookings() — отменяет все активные брони;
-# show_status() — показывает состояние всех туров и текущую выручку.
+

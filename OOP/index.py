@@ -14,7 +14,7 @@ class Teacher:
     @phone.setter
     def phone(sefl, value):
         print("сеттер сработал")
-        self.__phone = value
+       
 
     @phone.deleter
     def phone(self):
