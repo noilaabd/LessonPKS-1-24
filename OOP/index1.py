@@ -9,34 +9,134 @@ class Computer:
     def __init__(self, id, hourly_rate, is_busy, current_client, start_time):
         self.__id = id
         self.__hourly_rate = hourly_rate
-        self._is_busy = is_busy
-        self._current_client = current_client
-        self._start_time = start_time
+        self._is_busy = False
+        self._current_client = None
+        self._start_time = 0
+        
+    @property
+    def id(self):
+        return self.__id
 
     @property
     def hourly_rate(self):
         return self.__hourly_rate
-                
-    @hourly_rate.setter
-    def hourly_rate(self, rate):
-        if rate < 100:
-            print("минимум за час 100 сом")
-        self.__hourly_rate = rate
-
-    @property
-    def id(self):
-        return self.__id
     
+    @hourly_rate.setter
+    def hourly_rate(self, new_rate):
+        if new_rate >= 50 and new_rate<=1000:
+            self.__hourly_rate = new_rate
+
     def start_session(self, client, hours):
         if self._is_busy:
-            print("Компьютер занят")
-        self._is_busy = True
-        self._current_client = client
-        self._start_time = hours  # упрощение для примера
-
+            print("Комп занят")
+            return False
+        cost = self.__hourly_rate * hours
+        if client.pay(cost):
+            self._is_busy = True
+            self._current_client = client
+            self._start_time = hours
+            print(f"{client} занял комп {self.id} на {hours}час, за {cost}сом")
+        else:
+            print(f"Клиента {client.name} не хватает денег")
+        
     def end_session(self):
         if not self._is_busy:
-            print("Компьютер не занят")
+            print("Компьютер не использовался")
+            return 0 
+        self._is_busy = False
+        income = self.__hourly_rate*self._start_time
+        client_name = self._current_client.name
+        print("Сессия завершена")
+        self._current_client = None
+        self._start_time = 0
+        return income
+    
+    def info(self):
+        status = 'Занят' if self._is_busy else "Свободен"
+        return f"комп {self.id} {status} {self.__hourly_rate} сом/ч"
+    
+class Client:
+    def __init__(self, name, balance):
+        self.name = name
+        self._balance = balance
+
+    @property
+    def balance(self):
+        return self._balance
+    
+
+    def add_balance(self, amount):
+        if amount >0 and amount<=10000:
+            self._balance += amount
+            print(f"Баланс пополнен на {amount}сом, теперь у вас {self._balance}")
+        else:
+            print("Введите корректное значение на пополнение")
+            return False
+
+    def pay(self, amount):
+        if amount <= self._balance:
+            self._balance -= amount
+            return True
+        return False
+
+
+    def info(self):
+        print(f"Имя: {self.name} на карте: {self._balance} сом")
+
+
+class Club:
+    def __init__(self, name):
+        self.name = name
+        self.computers = []
+        self._income = 0
+
+
+    def add_computer(self, computer):
+        self.computers.append(computer)
+        print(f"Комп добавлен {computer.id} с тарифом {computer.hourly_rate} сом/ч")
+
+    def find_free_computer(self):
+        for comp in self.computers:
+            if comp._is_busy == False:
+                return comp
+        return None
+    
+
+    def serve_client(self, client, hours):
+        free_comp = self.find_free_computer()
+        if not free_comp:
+            print("Нет свободных компов")
+            return
+        if free_comp.start_session(client, hours):
+            self._income += free_comp.hourly_rate * hours
+
+
+    def end_all_sessions(self):
+        for comp in self.computers:
+            self._income += self.end_session()
+            print("Все закрыто")
+
+    def show_status(self):
+        print(f"Клуб {self.name}")
+        for comp in self.computers:
+            print(comp.info())
+        print(f"Выручка клуба {self._income} сом")
+
+
+    @property
+    def income(self):
+        return self._income
+    
+
+b = Club("HuneHunerClub")
+b.add_computer(Computer(1,100))
+b.add_computer(Computer(2,150))
+b.add_computer(Computer(3,180))
+x = Client('Malika', 500)
+y = Client('Aliya', 100)
+b.serve_client(y, 2)
+b.serve_client(x, 3.5)
+b.show_status()
         
 
 
